@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractCommandTask extends AbstractRunnableTask {
 
-    Process process;
-    ProcessBuilder pb;
+    protected Process process;
+    protected  ProcessBuilder pb;
     protected AbstractCommandTask(){
 
     }

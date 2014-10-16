@@ -24,6 +24,8 @@ public abstract class AbstractRunnableTask implements RunnableTask{
         taskCompletionStatus = TaskCompletionStatus.NOT_RUN;
     }
 
+
+
     @Override
     public TaskCompletionStatus getCompletionStatus() {
         return null;
