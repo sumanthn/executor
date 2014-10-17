@@ -1,30 +1,51 @@
-package sn.executor;
+package sn.taskrunner;
 
+import akka.actor.Props;
 import akka.actor.UntypedActor;
+import sn.executor.TaskCommand;
+import sn.executor.TaskResponseMsg;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by Sumanth on 16/10/14.
+ * Created by Sumanth on 17/10/14.
  */
 public class CommandExecutor extends UntypedActor {
+    private int commandExitVal = -1;
+    private CommandTaskParameters taskParameters;
+
+    public CommandExecutor(CommandTaskParameters taskParameters) {
+        this.taskParameters = taskParameters;
+    }
+
+    public static Props create(final CommandTaskParameters taskParameters) {
+        return Props.create(CommandExecutor.class, taskParameters);
+    }
+
     @Override
     public void onReceive(Object msg) throws Exception {
 
-        if (msg instanceof String){
+        System.out.println("Command executor some message arrived");
+        if (msg instanceof String) {
             System.out.println("CommandExecutor:Execute command now");
             runCommand();
 
 
             System.out.println("Completed command run, now return");
-            getContext().sender().tell("Completed",self());
+            getContext().sender().tell("Completed", self());
 
+        } else if (msg instanceof TaskCommand) {
+            System.out.println("rcvd task command, respond now ");
+            if (commandExitVal == 0)
+                getContext().sender().tell(TaskResponseMsg.SUCCESS,self());
+            else
+                getContext().sender().tell(TaskResponseMsg.FAILED,self());
         }
     }
 
-    private void runCommand(){
-        ProcessBuilder procBuilder = new ProcessBuilder("python", "/Users/Sumanth/scripts/tst1.py");
+    private void runCommand() {
+        ProcessBuilder procBuilder = new ProcessBuilder(taskParameters.getCommand(), taskParameters.getCommandParams());
         procBuilder.inheritIO();
 
         try {
@@ -36,9 +57,9 @@ public class CommandExecutor extends UntypedActor {
             if (successExec) {
                 int exitVal = proc.exitValue();
                 System.out.println("Exit status as " + exitVal);
+                commandExitVal = exitVal;
 
-
-            }else{
+            } else {
 
                 System.out.println("Trying to kill it for now");
 
@@ -49,9 +70,10 @@ public class CommandExecutor extends UntypedActor {
         } catch (IOException e) {
             e.printStackTrace();
 
-        }catch (IllegalThreadStateException e2){
+        } catch (IllegalThreadStateException e2) {
             e2.printStackTrace();
 
         }
     }
 }
+
