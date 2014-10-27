@@ -8,6 +8,8 @@ public enum  TaskState {
     RUNNING,
     SUSPENDED,
     INTERRUPTED,
+    SUCCESS,
+    FAILED,
     COMPLETED
 
 }
